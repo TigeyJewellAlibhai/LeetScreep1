@@ -107,6 +107,7 @@ module.exports = {
     makeTrade: function(roomName){
         if (roomName.terminal) {
             if (roomName.terminal.store[RESOURCE_ENERGY] >= 20000) {
+                console.log(roomName.name + ' trade parameters reached. Searching for trade...');
                 var orders = Game.market.getAllOrders(order => order.resourceType == RESOURCE_ENERGY &&
                     order.type == ORDER_BUY &&
                     Game.market.calcTransactionCost(10000, roomName.name, order.roomName) < 20000);

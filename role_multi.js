@@ -30,7 +30,9 @@ module.exports = {
         }
 
         else {
-            creepTek.harvestFromStorage(creep, 500000);
+            if(creepTek.harvestFromStorage(creep, 500000) == false){
+                this.runMining(creep);
+            }
         }
     },
 
@@ -45,7 +47,7 @@ module.exports = {
 
         if(creep.memory.working == true) {
             var structure = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_TERMINAL && _.sum(s.store) < s.storeCapacity});
-            if(structure != undefined && creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            if(structure != undefined && creep.transfer(structure, RESOURCE_LEMERGIUM) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(structure);
             }
 
@@ -59,7 +61,9 @@ module.exports = {
         }
 
         else {
-            creepTek.harvestFromStorage(creep, 500000);
+            creepTek.harvestFromMineral(creep);
         }
     }
+
+
 };

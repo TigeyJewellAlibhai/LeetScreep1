@@ -144,7 +144,7 @@ module.exports = {
             } else if (numDefenders < 2) {
                 roleDefender.create([ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH], undefined, roomSpawn)
             } else if (numMulti < 1) {
-                roleMulti.create([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], undefined, roomSpawn);
+                roleMulti.create([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE], undefined, roomSpawn);
             }
             //else if(numAttackers < 2) {roleAttacker.create([WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE],undefined, roomSpawn);}
         }
@@ -320,7 +320,7 @@ module.exports = {
             variables.smartSpawn('defender',[ATTACK,MOVE,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH],roomSpawn,3);
         }
         else if(numMulti == 0){
-            roleMulti.create([CARRY, CARRY, CARRY, CARRY, MOVE], undefined, roomSpawn);
+            roleMulti.create([CARRY, CARRY, CARRY, CARRY, WORK, WORK, MOVE], undefined, roomSpawn);
         }
 
         //----------------------- CONSOLE STATUS MESSAGE ----------------------------

@@ -62,10 +62,54 @@ module.exports = {
 
     },
 
+
+    harvestFromMineral: function(creep) {
+        let sources = creep.room.find(FIND_MY_CREEPS, {filter: (c) => c.memory.role == 'mineral_miner'});// && c.memory.working == 'true'});
+        if (sources.length != 0) {
+            sources = _.sortBy(sources, (s) => s.pos.getRangeTo(Game.spawns.Spawn1));
+            var source = sources[sourceNum];
+            if (source == undefined) {
+                source = sources[0];
+            }
+            creep.moveTo(source);
+            if(creep.pos.getRangeTo(source) < 2) {
+                var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: ((s) => s.structureType == STRUCTURE_CONTAINER)});
+                //if(container =! undefined) {
+                if (/*_.sum(container.store) > 0 &&*/ container.pos.inRangeTo(creep.pos, 2) == true) {
+                    creep.withdraw(container, RESOURCE_ENERGY, creep.energyCapacityAvailable);
+                }
+
+                /*
+                else {
+                    let sources = creep.room.find(FIND_SOURCES);
+                    sources = _.sortBy(sources, (s) => -s.pos.getRangeTo(creep.room.spawns[0]));
+                    var source = sources[sourceNum];
+                    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(source);
+                    }
+                }
+                 */
+            }
+            //}
+        }
+        else {
+            let source = creep.pos.findClosestByRange(FIND_MINERALS);
+            if (source != undefined) {
+                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source);
+                }
+            }
+        }
+
+    },
+
     harvestFromStorage: function(creep, minReserve) {
         var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.structureType == STRUCTURE_STORAGE && _.sum(s.store) > minReserve});
         if(creep.withdraw(source,RESOURCE_ENERGY,creep.energyCapacityAvailable) == ERR_NOT_IN_RANGE){
             creep.moveTo(source);
+        }
+        else{
+            return false;
         }
 
     },
