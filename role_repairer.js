@@ -10,7 +10,7 @@ module.exports = {
         s.createCreep(body, name,{role: 'repairer', working: false});
     },
 
-    run: function(creep,sourceNum,roomName){
+    run: function(creep,sourceNum){
         if(creep.memory.working == true && creep.carry.energy == 0){
             creep.memory.working = false;
         }
@@ -20,7 +20,7 @@ module.exports = {
         }
 
         if(creep.memory.working == true) {
-            var tower = variables.getLowTower(roomName);
+            var tower = variables.getLowTower(creep.room);
             var repairSite = creep.pos.findClosestByPath(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL && s.structureType != STRUCTURE_RAMPART});
             if(tower != undefined && tower.energy < tower.energyCapacity) {
                 if (creep.transfer(tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

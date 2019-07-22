@@ -1,7 +1,7 @@
 var variables = require('variables');
 var spawnDesignator = require('spawn_designator');
 var roleMiner = require('role_miner');
-var roleHarvesterCS = require('role_harvesterCS');
+var roleHarvesterCS = require('role_harvesterCS'); 
 var roleUpgraderCS = require('role_upgraderCS');
 var roleBuilderCS = require('role_builderCS');
 var roleRepairerCS = require('role_repairerCS');
@@ -24,6 +24,7 @@ var room2 = Game.spawns.Spawn2.room;
 var room3 = Game.spawns.Spawn3.room;
 var rooms = [room1];
 var allies = ['FrostBird347'];
+var fullStatus = false;
 
 module.exports.loop = function(){
 
@@ -72,20 +73,24 @@ module.exports.loop = function(){
             }
     }
 
-    for(let r in rooms) {
 
         var hostiles = variables.findHostiles(room1);
         if (hostiles.length > 0) {
-            console.log('ENEMIES APPROACHING');
-            turretAI.towerDefense(room1);
-            roleDefender.create([ATTACK, ATTACK, MOVE, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH], undefined, room1.find(FIND_MY_SPAWNS)[0]);
+            if(hostiles.length < 3) {
+                if (variables.fractionDelay(10)) {console.log('THREAT IDENTIFIED');}
+                turretAI.towerDefense(room1);
+                roleDefender.create([ATTACK, ATTACK, MOVE, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH], undefined, room1.find(FIND_MY_SPAWNS)[0]);
+            }
+            else{
+                if (variables.fractionDelay(10)) {console.log('SIEGE MODE ENGAGED');}
+            }
         } else {
             turretAI.towerPassive(room1);
         }
         
         var hostiles = variables.findHostiles(room2);
         if (hostiles.length > 0) {
-            console.log('ENEMIES APPROACHING');
+            if(variables.fractionDelay(10)){console.log('THREAT IDENTIFIED');}
             turretAI.towerDefense(room2);
             roleDefender.create([ATTACK, ATTACK, MOVE, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH], undefined, room2.find(FIND_MY_SPAWNS)[0]);
         } else {
@@ -94,25 +99,38 @@ module.exports.loop = function(){
         
         var hostiles = variables.findHostiles(room3);
         if (hostiles.length > 0) {
-            console.log('ENEMIES APPROACHING');
+            if(variables.fractionDelay(10)){console.log('THREAT IDENTIFIED');}
             turretAI.towerDefense(room3);
             roleDefender.create([ATTACK, ATTACK, MOVE, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH], undefined, room3.find(FIND_MY_SPAWNS)[0]);
         } else {
             turretAI.towerPassive(room3);
         }
 
-        //spawnDesignator.runContainerMining(room1);
-        //spawnDesignator.runContainerMining(room2);
-        spawnDesignator.createContainerMining(room1);
-        spawnDesignator.createStandardSmartMining(room2);
-        //spawnDesignator.createStandardMining(room2);
-        spawnDesignator.createStandardMining(room3);
-        variables.makeTrade(room1);
-        variables.makeTrade(room2);
+
+        var room1Pop = spawnDesignator.createContainerMining(room1);
+        var room2Pop = spawnDesignator.createStandardSmartMining(room2);
+        var room3Pop = spawnDesignator.createStandardSmartMining(room3);
+
+        var state = [room1Pop, room2Pop, room3Pop];
+
+        if(variables.fractionDelay(50)) {
+            variables.makeTrade(room1);
+            variables.makeTrade(room2);
+            variables.makeTrade(room3);
+        };
+
+        if(fullStatus){
+            for(var i in state) {
+                console.log(state[i][0] + " POPULATION: " + state[i][1] + "H " + state[i][2] + "U " + state[i][3] + "B " + state[i][4] + "R " + state[i][5] + "MU " + state[i][6] + "MI " + state[i][7] + "D " + state[i][8] + "A");
+            }
+        }
+
+        fullStatus = false;
+
         //console.log(variables.smartSpawn([WORK,MOVE,ATTACK]).toString());
-    }
 },
 
+getStatus = function(){fullStatus = true; return "Loading Status at...";};
 
 getNumMiners =  function(){return numMiners;};
 

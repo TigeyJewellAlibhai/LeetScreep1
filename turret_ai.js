@@ -45,13 +45,9 @@ module.exports = {
                 //Find the closest damaged Structure
                 var closestDamagedStructure = towers[i].pos.findClosestByRange(FIND_STRUCTURES, {filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL && s.structureType != STRUCTURE_RAMPART});
                 var closestDamagedRampart = variables.getLowRampart(roomName);
-                var closestWorstRampart = variables.getLowestRampart(roomName);
                 var closestDamagedWall = variables.getLowWalls(roomName);
-                if(closestWorstRampart != undefined) {
-                    towers[i].repair(closestWorstRampart);
-                    //if(returnable){console.log(roomName.name + " TOWER STATUS: BUILD RAMPARTS")};
-                }
-                else if(closestDamagedRampart != undefined) {
+                var closestUpgrade = variables.getDefense(roomName);
+                if(closestDamagedRampart != undefined) {
                     towers[i].repair(closestDamagedRampart);
                     //if(returnable){console.log(roomName.name + " TOWER STATUS: REPAIR RAMPARTS")};
                 }
@@ -62,6 +58,13 @@ module.exports = {
                 else if(closestDamagedStructure) {
                     towers[i].repair(closestDamagedStructure);
                     //if(returnable){console.log(roomName.name + " TOWER STATUS: REPAIR BUILDINGS")};
+                }
+                else if(closestUpgrade) {
+                    if(variables.fractionDelay(40)) {
+                        //console.log(closestUpgrade.hits);
+                        towers[i].repair(closestUpgrade);
+                        //if(returnable){console.log(roomName.name + " TOWER STATUS: REPAIR BUILDINGS")};
+                    }
                 }
             }
         }

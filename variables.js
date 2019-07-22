@@ -1,8 +1,10 @@
 
 var allies = ['FrostBird347'];
 var towerReserve = 750;
-var rampartMin = 75000;
-var wallMin = 125000;
+var rampartMin = 150000;
+var wallMin = 150000;  //125000
+var rampartMax = 2000000;
+var wallMax = 2000000;
 
 module.exports = {
     getAllies: function(){return allies;},
@@ -29,13 +31,10 @@ module.exports = {
     },
 
     getLowRampart: function(room){
-        var ramparts = room.find(FIND_STRUCTURES, {filter: ((s) => s.structureType == STRUCTURE_RAMPART && s.hits < rampartMin)});
-        return ramparts[0];
-    },
-    
-    getLowestRampart: function(room){
-        var ramparts = room.find(FIND_STRUCTURES, {filter: ((s) => s.structureType == STRUCTURE_RAMPART && s.hits < 1000)});
-        return ramparts[0];
+        var ramparts = room.find(FIND_STRUCTURES, {filter: ((s) => s.structureType == STRUCTURE_RAMPART)}).sort(function(a,b){return a.hits - b.hits});
+        if(ramparts[0].hits < rampartMin) {
+            return ramparts[0];
+        }
     },
 
     getWalls: function(room){
@@ -44,8 +43,18 @@ module.exports = {
     },
 
     getLowWalls: function(room){
-        var walls = room.find(FIND_STRUCTURES, {filter: ((s) => s.structureType == STRUCTURE_WALL && s.hits < wallMin)});
-        return walls[0];
+        var walls = room.find(FIND_STRUCTURES, {filter: ((s) => s.structureType == STRUCTURE_WALL)}).sort(function(a,b){return a.hits - b.hits});
+        walls.sort(function(a,b){+a.hits - +b.hits});
+        if(walls[0].hits < wallMin) {
+            return walls[0];
+        }
+    },
+
+    getDefense: function(room){
+        var defenses = room.find(FIND_STRUCTURES, {filter: ((s) => s.structureType == STRUCTURE_WALL || s.structureType == STRUCTURE_RAMPART)}).sort(function(a,b){return a.hits - b.hits});
+        if(defenses[0].hits < wallMax){
+            return defenses[0];
+        }
     },
 
     findHostiles: function(room){
@@ -106,6 +115,7 @@ module.exports = {
 
     makeTrade: function(roomName){
         if (roomName.terminal) {
+            //console.log(roomName + _.sum(roomName.terminal.store));
             if (roomName.terminal.store[RESOURCE_ENERGY] >= 20000) {
                 console.log(roomName.name + ' trade parameters reached. Searching for trade...');
                 var orders = Game.market.getAllOrders(order => order.resourceType == RESOURCE_ENERGY &&
@@ -123,6 +133,7 @@ module.exports = {
                 else{
                     console.log('Transaction failed: highest price is ' + orders[0].price);
                 }
+                orders = null;
             }
         }
     },
@@ -169,6 +180,10 @@ module.exports = {
         //return result;
 
         roomSpawn.createCreep(result,undefined,{role: role, working: false});
+    },
+
+    fractionDelay: function(num){
+        return(Game.time % num == 0);
     }
 };
 

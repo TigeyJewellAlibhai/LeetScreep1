@@ -10,8 +10,6 @@ var roleMulti = require('role_multi');
 var roleDefender = require('role_defender');
 var turretAI = require('turret_ai');
 
-var globalCount = 0;
-
 module.exports = {
     createContainerMining: function (r) {
         var roomSpawn = r.find(FIND_MY_SPAWNS)[0];
@@ -37,7 +35,7 @@ module.exports = {
                 } else if (creep.memory.role == 'builder') {
                     roleBuilder.run(creep, 1);
                 } else if (creep.memory.role == 'repairer') {
-                    roleRepairer.run(creep, 0, creep.room);
+                    roleRepairer.run(creep, 0);
                 } else if (creep.memory.role == 'miner') {
                     roleMiner.run(creep);
                 } else if (creep.memory.role == 'defender') {
@@ -149,14 +147,8 @@ module.exports = {
             //else if(numAttackers < 2) {roleAttacker.create([WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE],undefined, roomSpawn);}
         }
 
-        //----------------------- CONSOLE STATUS MESSAGE ----------------------------
-        globalCount += 1;
-        if (globalCount == 7) {
-            console.log(
-                roomSpawn.room.name + ' ROLE POPULATION: ' + numMiners + 'M ' + numHarvester + 'H ' + numBuilder + 'B ' + numUpgrader + 'U ' + numRepairer + 'R ' + numDefenders + 'D ' + numAttackers + 'A'
-            );
-            globalCount = 0;
-        }
+        var state = [r.name, numHarvester, numUpgrader, numBuilder, numRepairer, numMulti, numMiners, numDefenders, numAttackers];
+        return state;
     },
 
     createStandardMining: function (r) {
@@ -187,9 +179,11 @@ module.exports = {
                 } else if (creep.memory.role == 'builder') {
                     roleBuilder.run(creep, 1);
                 } else if (creep.memory.role == 'repairer') {
-                    roleRepairer.run(creep, 0, creep.room);
+                    roleRepairer.run(creep, 0);
                 } else if (creep.memory.role == 'miner') {
                     roleMiner.run(creep);
+                } else if (creep.memory.role == 'multi') {
+                    roleMulti.runTerminal(creep);
                 } else if (creep.memory.role == 'defender') {
                     roleDefender.run(creep, creep.room);
                 }
@@ -250,19 +244,15 @@ module.exports = {
                 roleBuilder.create([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE], undefined, roomSpawn)
             } else if (numDefenders < 2) {
                 roleDefender.create([ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH], undefined, roomSpawn)
+            } else if (numMulti < 1) {
+                roleMulti.create([CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE], undefined, roomSpawn);
             }
             //else if(numAttackers < 2) {roleAttacker.create([WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE],undefined, roomSpawn);}
             //else if(numAttackers < 2) {roleAttacker.create([WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE],undefined, roomSpawn);}
         }
 
-        //----------------------- CONSOLE STATUS MESSAGE ----------------------------
-        globalCount += 1;
-        if (globalCount == 7) {
-            console.log(
-                roomSpawn.room.name + ' ROLE POPULATION: ' + numMiners + 'M ' + numHarvester + 'H ' + numBuilder + 'B ' + numUpgrader + 'U ' + numRepairer + 'R ' + numDefenders + 'D ' + numAttackers + 'A'
-            );
-            globalCount = 0;
-        }
+        var state = [r.name, numHarvester, numUpgrader, numBuilder, numRepairer, numMulti, numMiners, numDefenders, numAttackers];
+        return state;
     },
 
     createStandardSmartMining: function(r){
@@ -293,7 +283,7 @@ module.exports = {
                 } else if (creep.memory.role == 'builder') {
                     roleBuilder.run(creep, 1);
                 } else if (creep.memory.role == 'repairer') {
-                    roleRepairer.run(creep, 0, creep.room);
+                    roleRepairer.run(creep, 0);
                 } else if (creep.memory.role == 'miner') {
                     roleMiner.run(creep);
                 } else if (creep.memory.role == 'multi') {
@@ -304,34 +294,24 @@ module.exports = {
             }
         }
 
-        if(numHarvester < 2){
-            variables.smartSpawn('harvester',[WORK,CARRY,CARRY,MOVE],roomSpawn,2);
-        }
-        else if(numRepairer < 2){
-            variables.smartSpawn('repairer',[WORK,CARRY,CARRY,MOVE],roomSpawn,2);
-        }
-        else if(numUpgrader < 2){
-            variables.smartSpawn('upgrader',[WORK,CARRY,CARRY,MOVE],roomSpawn,2);
-        }
-        else if(numBuilder < 2){
-            variables.smartSpawn('builder',[WORK,CARRY,CARRY,MOVE],roomSpawn,2);
-        }
-        else if(numDefenders < 2){
-            variables.smartSpawn('defender',[ATTACK,MOVE,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH],roomSpawn,3);
-        }
-        else if(numMulti == 0){
-            roleMulti.create([CARRY, CARRY, CARRY, CARRY, WORK, WORK, MOVE], undefined, roomSpawn);
+        if(Game.time % Math.ceil(1500 / 11) == 0) {
+            console.log('spawn active');
+            if (numHarvester < 2) {
+                variables.smartSpawn('harvester', [WORK, CARRY, CARRY, MOVE], roomSpawn, 2);
+            } else if (numRepairer < 2) {
+                variables.smartSpawn('repairer', [WORK, CARRY, CARRY, MOVE], roomSpawn, 2);
+            } else if (numUpgrader < 2) {
+                variables.smartSpawn('upgrader', [WORK, CARRY, CARRY, MOVE], roomSpawn, 2);
+            } else if (numBuilder < 2) {
+                variables.smartSpawn('builder', [WORK, CARRY, CARRY, MOVE], roomSpawn, 2);
+            } else if (numDefenders < 2) {
+                variables.smartSpawn('defender', [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, ATTACK ], roomSpawn, 3);
+            } else if (numMulti == 0) {
+                variables.smartSpawn('multi',[CARRY, CARRY, CARRY, CARRY, WORK, WORK, MOVE], roomSpawn, 2);
+            }
         }
 
-        //----------------------- CONSOLE STATUS MESSAGE ----------------------------
-        globalCount += 1;
-        if (globalCount == 7) {
-            console.log(
-                roomSpawn.room.name + ' ROLE POPULATION: ' + numMiners + 'M ' + numHarvester + 'H ' + numBuilder + 'B ' + numUpgrader + 'U ' + numRepairer + 'R ' + numDefenders + 'D ' + numAttackers + 'A'
-            );
-            globalCount = 0;
-        }
+        var state = [r.name, numHarvester, numUpgrader, numBuilder, numRepairer, numMulti, numMiners, numDefenders, numAttackers];
+        return state;
     }
-
-
 };
